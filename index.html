@@ -1079,7 +1079,7 @@ function evaluateSmall() {
     const percent = Math.round((totalWeightedScore / maxPossibleScore) * 100);
     const resDiv = document.getElementById('small-result');
     
-    // Vložení obsahu do výsledkového divu
+// Vložení obsahu do výsledkového divu
     resDiv.innerHTML = `
         <div id="pdf-source-data" class="space-y-8 p-4 w-full">
             <div class="text-center border-b-2 border-indigo-600 pb-6">
@@ -1107,11 +1107,23 @@ function evaluateSmall() {
                <span>📥</span> STÁHNOUT 10 ZÁKLADNÍCH PRAVIDEL BEZPEČNOSTI (PDF)
             </a>
         </div>
+
+        <div id="download-e-book-pdf" class="hidden mt-4">
+            <a href="https://drive.google.com/file/d/1FjHqO-yO9pkdA6bdxKc-w_NLw5xxHNdx/view?usp=drivesdk" 
+               target="_blank"
+               class="no-print w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2">
+               <span>📖</span> STÁHNOUT E-BOOK (PDF)
+            </a>
+        </div>
     `;
 
+    // ZOBRAZENÍ odkaz TLAČÍTEK 
     document.getElementById('download-rules-pdf').classList.remove('hidden');
+    document.getElementById('download-e-book-pdf').classList.remove('hidden'); 
+    
     resDiv.classList.remove('hidden');
     resDiv.scrollIntoView({ behavior: 'smooth' });
+
 }
 
 
