@@ -1123,73 +1123,75 @@ function evaluateSmall() {
             
             const textAns = selectEl.options[selectEl.selectedIndex].text;
             
-            // Logika větvení zobrazení podle váhy (1 = správně, ostatní = špatně/částečně)
-            if (weight === 1) {
-                // --- VARIANTY PRO SPRÁVNOU ODPOVĚĎ (Váha 1) ---
-                detailHTML += `
-                    <div class="mb-2 p-3 bg-white border border-slate-100 rounded-xl shadow-sm flex justify-between items-center w-full text-left">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs font-bold text-slate-400">#${q.id}</span>
-                            <h3 class="text-sm font-medium text-slate-700">${q.q}</h3>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-green-100 text-green-700">
-                            Odpověď: ${textAns}
-                        </span>
-                    </div>`;
-            } else {
-                // --- VARIANTA PRO ŠPATNOU ODPOVĚĎ (Váha 0, 0.5, 0.1) ---
-                let colorClass = weight === 0.5 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
-                
-                // Příprava checklistu (pouze pro špatné odpovědi)
-                let checklistHTML = "";
-                if (q.checklist) {
-                    const items = q.checklist.split(';');
-                    checklistHTML = `
-                        <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-6">
-                            <div class="flex justify-between items-end mb-4">
-                                <h4 class="font-bold text-amber-900 uppercase text-xs tracking-widest">✅ Akční checklist pro vás</h4>
-                            </div>
-                            <div class="space-y-3">
-                                ${items.map(item => `
-                                    <div class="flex items-center gap-3 text-sm text-amber-900">
-                                        <span class="flex-grow">${item.trim()}</span>
-                                        <input type="checkbox" class="w-5 h-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500 cursor-pointer">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>`;
-                }
+            // Logika barev podle váhy (1 = zelená, 0.5 = oranžová, zbytek = červená)
+            let colorClass = "bg-red-100 text-red-700";
+            if (weight === 1) colorClass = "bg-green-100 text-green-700";
+            else if (weight === 0.5) colorClass = "bg-amber-100 text-amber-700";
 
-                detailHTML += `
-                    <div class="mb-10 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm break-inside-avoid w-full text-left">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${q.cat}</span>
-                                <h3 class="text-lg font-bold text-slate-900">${q.id}. ${q.q}</h3>
-                            </div>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold ${colorClass}">
-                                Odpověď: ${textAns}
-                            </span>
-                        </div>
-                        <div class="space-y-4">
-                            <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-indigo-400">
-                                <p class="text-slate-600 text-sm italic mb-2">${q.eval}</p>
-                                <p class="text-slate-900 text-sm font-medium"><strong>Shrnutí:</strong> ${q.rec}</p>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                                    <p class="text-[10px] font-bold text-emerald-700 uppercase mb-1">✅ Zásadní pravidlo</p>
-                                    <p class="text-sm text-emerald-900">${q.rule}</p>
+            // Příprava checklistu (pokud existuje)
+            let checklistHTML = "";
+            if (q.checklist && weight < 1) {
+                const items = q.checklist.split(';');
+                checklistHTML = `
+                    <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-6">
+                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-widest mb-4">✅ Akční checklist pro vás</h4>
+                        <div class="space-y-3">
+                            ${items.map(item => `
+                                <div class="flex items-center gap-3 text-sm text-amber-900">
+                                    <span class="flex-grow">${item.trim()}</span>
+                                    <input type="checkbox" class="w-5 h-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500 cursor-pointer">
                                 </div>
-                                <div class="p-4 bg-red-50 rounded-xl border border-red-100">
-                                    <p class="text-[10px] font-bold text-red-700 uppercase mb-1">❌ Co nedělat</p>
-                                    <div class="text-sm text-red-900">${formatBySemicolon(q.dont)}</div>
-                                </div>
-                            </div>
-                            ${checklistHTML}
+                            `).join('')}
                         </div>
                     </div>`;
             }
+
+            // --- HLAVNÍ BLOK OTÁZKY ---
+            detailHTML += `
+                <div class="mb-10 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm break-inside-avoid w-full text-left">
+                    <div class="flex justify-between items-start mb-4 gap-4">
+                        <div>
+                            <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${q.cat || 'Bezpečnost'}</span>
+                            <h3 class="text-lg font-bold text-slate-900">${q.id}. ${q.q}</h3>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${colorClass}">
+                            Odpověď: ${textAns}
+                        </span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-indigo-400">
+                            <p class="text-slate-600 text-sm italic mb-2">${q.eval || ''}</p>
+                            <p class="text-slate-900 text-sm font-medium"><strong>Shrnutí:</strong> ${q.rec || ''}</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <p class="text-[10px] font-bold text-emerald-700 uppercase mb-1">✅ Zásadní pravidlo</p>
+                                <p class="text-sm text-emerald-900">${q.rule || 'Není definováno'}</p>
+                            </div>
+                            <div class="p-4 bg-red-50 rounded-xl border border-red-100">
+                                <p class="text-[10px] font-bold text-red-700 uppercase mb-1">❌ Co nedělat</p>
+                                <div class="text-sm text-red-900">${formatBySemicolon(q.dont || '')}</div>
+                            </div>
+                        </div>
+
+                        ${weight < 1 ? `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                                <p class="text-[10px] font-bold text-indigo-700 uppercase mb-1">💡 Doporučení zdarma</p>
+                                <div class="text-sm text-indigo-900">${formatBySemicolon(q.recFree || 'Standardní postup')}</div>
+                            </div>
+                            <div class="p-4 bg-slate-900 rounded-xl text-white">
+                                <p class="text-[10px] font-bold text-indigo-300 uppercase mb-1">💰 Placené řešení (Profi)</p>
+                                <div class="text-sm text-slate-200">${formatBySemicolon(q.recPaid || 'Konzultujte s odborníkem')}</div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        ${checklistHTML}
+                    </div>
+                </div>`;
         }
     });
 
