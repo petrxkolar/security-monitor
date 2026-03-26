@@ -314,7 +314,7 @@
 
 
 <div id="demo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-300">
+    <div class="bg-white w-full max-w-4xl rounded-[2rem] shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-300">
         
         <div class="absolute top-4 right-4 z-10">
             <button onclick="closeDemo()" class="w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-500 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors">
@@ -324,7 +324,7 @@
             </button>
         </div>
 
-        <div id="demo-content" class="p-8 md:p-10 max-h-[90vh] overflow-y-auto">
+        <div id="demo-content" class="p-6 md:p-12 lg:p-16 max-h-[90vh] overflow-y-auto">
             </div>
         
     </div>
@@ -772,16 +772,16 @@
 const demoQuestions = [
     { 
         id: 1, 
-        cat: "Odpovědnost", 
-        q: "Máte určenou osobu, která u vás řeší IT a bezpečnost?", 
+        cat: "Povědomí o bezpečnosti", 
+        q: "Víte, jak poznat phishingový (podvodný) e-mail?", 
         options: { "ano": 1, "castecne": 0.5, "ne": 0, "nevim": 0.1 }, 
-        rec: "Pokud není jasně určeno, kdo má IT a bezpečnost na starosti, problémy se často neřeší včas. U malých firem to vede ke zmatku ve chvíli, kdy dojde k poruše nebo bezpečnostnímu incidentu.",
-        eval: "Pokud nejste jednotlivec, definujte v rámci firmy zodpovědnost za IT a bezpečnost.",
-        rule: "Musím vědět, kdo má IT a bezpečnost na starosti a na koho se obrátit v případě bezpečnostího incidentu/útoku (může být i externí pomoc).", 
-        dont: "Nenechávat odpovědnost nejasnou nebo rozdělenou mezi více lidí bez domluvy. ; Nemít záložní kontakt na koho se obrátit pro pomoc.", 
-        recFree: "Majitel nebo zaměstnanec může převzít odpovědnost a vést si jednoduchý přehled systémů a přístupů.",
-        recPaid: "Externí IT nebo bezpečnostní konzultant, který tuto roli zajistí dlouhodobě (např. https://www.cybersecurityhub.cz).",
-        checklist: "Napište jméno odpovědné osoby (interní nebo externí).;Sepište seznam systémů, které používáte (e-mail, cloud, účetnictví, web…).;U každého systému určete správce a uložte přístupové údaje bezpečně (správce hesel).; Uložte si kontakty na IT/web/internet pro případ incidentu."
+        rec: "Phishingový e-mail je podvodná zpráva, která se snaží přimět uživatele ke kliknutí na odkaz, otevření přílohy nebo zadání hesla. Často se vydává za banku, úřad, dopravce nebo kolegu a vytváří pocit naléhavosti či strachu.",
+        eval: "Naučte se rozpoznávat phishingové emaily a při čtení emailů buďte pozorní.",
+        rule: "Nevěřte každému emailu a v případě pochybostí si zprávu ověrte jiným kanálem. E-mail, který vás nutí jednat rychle, straší Vás nebo naopak dává velmi výhodnou nabídku/výhruí, je vždy podezřelý. Často přichází od podezřelých odesílatelů, má zvláštní odkazy, je obecný a může obsahovat nepřesnosti.", 
+        dont: "Neklikejte na odkazy a přílohy, pokud si nejste jistí odesílatelem. ; Nezadávejte hesla po kliknutí na odkaz z e-mailu.; Nevěřte e-mailu jen proto, že vypadá „oficiálně“.; Nepředpokládejte, že malá firma není pro útočníky zajímavá.", 
+        recFree: "Projít si vzdělávací materiály dostupné zdarma, například: ; https://portal.gov.cz/kam-dal/cesky-egovernment/navod-jak-poznat-phisingove-utoky ; https://nukib.gov.cz/cs/infoservis/doporuceni/1497-socialni-inzenyrstvi/ ;  https://www.odpalhackera.cz/ (interaktivní zábavná aplikace) ; Nastavit si v e-mailu zobrazení celé adresy odesílatele ; Při pochybnostech ověřit informaci jiným způsobem (telefonicky, přímo na oficiálním webu)",
+        recPaid: "Zajistit pravidelné školení zaměstnanců v oblasti kybernetické bezpečnosti. ; Provádět simulované phishingové kampaně, které ukážou slabá místa.Nasadit pokročilou ochranu e-mailu (např. Microsoft Defender for Office 365 nebo podobné řešení).",
+        checklist: "Projděte si poslední podezřelé e-maily a vysvětlete si, proč byly nebezpečné a jaké jsou základní znaky phishingového emailu. ; Ověřte, že všichni zaměstnanci vědí, že heslo se nikdy neposílá e-mailem nebo po telefonu. ; Zapněte v e-mailu ochranu proti spamu a podvodným zprávám. ; Nastavte pravidlo: při pochybnostech se raději zeptat než udělat chybu (kliknout na odkaz, dát heslo, zaplatit fakturu, atd.)."
     }
 ];
 
@@ -815,16 +815,15 @@ function renderDemoQuestion() {
             <div class="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-widest text-center italic">Ukázka: ${q.cat}</div>
             <h3 class="text-xl font-bold text-slate-900 mb-6 text-center">${q.q}</h3>
             
-            <div class="grid grid-cols-1 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button onclick="nextDemo(1)" class="py-3 px-4 bg-white border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 transition-all text-left font-medium flex items-center gap-3">
-                    <span class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm">✓</span> Ano, máme
+                    <span class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm">✓</span> Ano
                 </button>
                 <button onclick="nextDemo(0.5)" class="py-3 px-4 bg-white border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 transition-all text-left font-medium flex items-center gap-3">
-                    <span class="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm">!</span> Částečně / Řešíme
+                    <span class="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm">!</span> Částečně
                 </button>
                 <button onclick="nextDemo(0)" class="py-3 px-4 bg-white border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 transition-all text-left font-medium flex items-center gap-3">
-                    <span class="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-sm">✕</span> Ne, nemáme
-                </button>
+                    <span class="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-sm">✕</span> Ne
                 <button onclick="nextDemo(0.1)" class="py-3 px-4 bg-white border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 transition-all text-left font-medium flex items-center gap-3">
                     <span class="w-8 h-8 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-sm">?</span> Nevím
                 </button>
@@ -860,6 +859,7 @@ function formatDemoChecklist(text) {
     });
     return html + '</ul>';
 }
+
 
 // 4. Finální zobrazení výsledku
 function renderDemoResult() {
@@ -912,39 +912,106 @@ function renderDemoResult() {
     content.innerHTML = resultHtml;
 }
 
-// Pomocná funkce, která vrací HTML "špatného" reportu
 function renderDemoRiskContent(q) {
+    // Pomocná funkce pro aktivaci odkazů (vložená přímo pro jistotu)
+    const linkify = (inputText) => {
+        if (!inputText) return "";
+        const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+        return inputText.replace(urlPattern, '<a href="$1" target="_blank" class="text-indigo-600 underline hover:text-indigo-800 break-all">$1</a>');
+    };
+
+    // Pomocná funkce pro formátování seznamů se středníky (vaše logika)
+    const renderList = (text, defaultText = "") => {
+        const val = text || defaultText;
+        if (!val.includes(';')) return `<div>${linkify(val)}</div>`;
+
+        const parts = val.split(';');
+        let html = '<ul class="list-none space-y-1">';
+
+        for (let i = 0; i < parts.length; i++) {
+            let trimmed = parts[i].trim();
+
+            // Detekce ;; (podsekce)
+            if (trimmed === "" && i < parts.length - 1) {
+                let nextTrimmed = parts[i + 1].trim();
+                if (nextTrimmed.length > 0) {
+                    html += `<li class="ml-6 flex items-start gap-2 text-slate-500 italic text-xs">
+                                <span class="mt-1">◦</span> 
+                                <span>${linkify(nextTrimmed)}</span>
+                             </li>`;
+                    i++; 
+                }
+                continue;
+            }
+
+            // Klasický hlavní bod
+            if (trimmed.length > 0) {
+                html += `<li class="flex items-start gap-2">
+                            <span class="text-indigo-500 mt-1">•</span> 
+                            <span>${linkify(trimmed)}</span>
+                         </li>`;
+            }
+        }
+        html += '</ul>';
+        return html;
+    };
+
+    const colorClass = "bg-red-100 text-red-700";
+    const textAns = "NE / ČÁSTEČNĚ";
+
     return `
-        <div class="space-y-4">
-            <div class="flex items-center gap-2 border-l-4 border-indigo-600 pl-3">
-                <h3 class="font-bold text-slate-800 uppercase tracking-tight">${q.cat}</h3>
+        <div class="mb-6 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm w-full text-left">
+            <div class="flex justify-between items-start mb-4 gap-4">
+                <div>
+                    <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${q.cat || 'Bezpečnost'}</span>
+                    <h3 class="text-lg font-bold text-slate-900">${q.q || 'Testovací otázka'}</h3>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${colorClass}">
+                    Odpověď: ${textAns}
+                </span>
             </div>
-            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">${q.rec}</p>
-        </div>
 
-        <div class="mt-6">
-            <h3 class="text-sm font-black text-slate-900 mb-4 flex items-center gap-2 uppercase italic">
-                <span class="bg-yellow-400 text-white p-1 rounded-md text-[10px]">✔</span> 
-                Prioritní úkoly (Checklist)
-            </h3>
-            ${formatDemoChecklist(q.checklist)}
-        </div>
+            <div class="space-y-4">
+                <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-indigo-400">
+                    <p class="text-slate-600 text-sm italic mb-2">${q.eval || 'K této oblasti existují bezpečnostní rizika.'}</p>
+                    <p class="text-slate-900 text-sm font-medium"><strong>Shrnutí:</strong> ${linkify(q.rec || '')}</p>
+                </div>
 
-        <div class="grid grid-cols-1 gap-3 text-[11px]">
-            <div class="p-3 bg-green-50 border border-green-100 rounded-xl text-green-800">
-                <span class="font-bold uppercase italic block mb-1 text-[9px]">Zlaté pravidlo:</span>
-                ${q.rule}
-            </div>
-            <div class="p-3 bg-red-50 border border-red-100 rounded-xl text-red-800">
-                <span class="font-bold uppercase italic block mb-1 text-[9px]">Čemu se vyhnout:</span>
-                <ul class="list-disc list-inside space-y-1">
-                    ${q.dont.split(';').map(d => `<li>${d.trim()}</li>`).join('')}
-                </ul>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <p class="text-[10px] font-bold text-emerald-700 uppercase mb-1">✅ Zásadní pravidlo</p>
+                        <div class="text-sm text-emerald-900">${renderList(q.rule, 'Není definováno')}</div>
+                    </div>
+
+                    <div class="p-4 bg-red-50 rounded-xl border border-red-100">
+                        <p class="text-[10px] font-bold text-red-700 uppercase mb-1">❌ Co nedělat</p>
+                        <div class="text-sm text-red-900">${renderList(q.dont, '')}</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                        <p class="text-[10px] font-bold text-indigo-700 uppercase mb-1">💡 Doporučení zdarma</p>
+                        <div class="text-sm text-indigo-900">${renderList(q.recFree, 'Standardní postup')}</div>
+                    </div>
+
+                    <div class="p-4 bg-slate-900 rounded-xl text-white shadow-lg">
+                        <p class="text-[10px] font-bold text-indigo-300 uppercase mb-1">💰 Placené řešení (Profi)</p>
+                        <div class="text-sm text-slate-200">${renderList(q.recPaid, 'Konzultujte s odborníkem')}</div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h3 class="text-sm font-black text-slate-900 mb-3 flex items-center gap-2 uppercase italic text-center justify-center">
+                        <span class="bg-yellow-400 text-white p-1 rounded-md text-[10px]">✔</span> 
+                        Prioritní úkoly (Checklist)
+                    </h3>
+                    ${formatDemoChecklist(q.checklist)}
+                </div>
             </div>
         </div>
     `;
 }
-
 // Funkce pro ruční vyvolání ukázky rizika (přepíše aktuální pohled)
 function renderDemoRiskShowcase() {
     const q = demoQuestions[0];
