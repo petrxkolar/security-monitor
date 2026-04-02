@@ -1172,11 +1172,11 @@ function renderSmall() {
 function evaluateSmall() {
     let totalWeightedScore = 0;
     let maxPossibleScore = smallQuestions.length;
-    let detailHTML = ""; 
     let allAnswered = true;
+    let resultsArray = []; // Pomocné pole pro uložení výsledků
 
-    // 1. Kontrola odpovědí a sběr dat
-    smallQuestions.forEach(q => {
+    // 1. Sběr dat a kontrola vyplnění
+    for (const q of smallQuestions) {
         const selectEl = document.getElementById(`sq${q.id}`);
         const val = selectEl ? selectEl.value : "";
         
@@ -1185,87 +1185,122 @@ function evaluateSmall() {
             if(selectEl) selectEl.parentElement.classList.add('border-red-300', 'bg-red-50');
         } else {
             if(selectEl) selectEl.parentElement.classList.remove('border-red-300', 'bg-red-50');
+            
             const weight = q.options[val];
             totalWeightedScore += weight;
-            
             const textAns = selectEl.options[selectEl.selectedIndex].text;
-            
-            // Logika barev podle váhy (1 = zelená, 0.5 = oranžová, zbytek = červená)
-            let colorClass = "bg-red-100 text-red-700";
-            if (weight === 1) colorClass = "bg-green-100 text-green-700";
-            else if (weight === 0.5) colorClass = "bg-amber-100 text-amber-700";
 
-            // Příprava checklistu (pokud existuje)
-            let checklistHTML = "";
-            if (q.checklist && weight < 1) {
-                const items = q.checklist.split(';');
-                checklistHTML = `
-                    <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-6">
-                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-widest mb-4">✅ Akční checklist pro vás</h4>
-                        <div class="space-y-3">
-                            ${items.map(item => `
-                                <div class="flex items-center gap-3 text-sm text-amber-900">
-                                    <span class="flex-grow">${item.trim()}</span>
-                                    <input type="checkbox" class="w-5 h-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500 cursor-pointer">
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>`;
-            }
-
-            // --- HLAVNÍ BLOK OTÁZKY ---
-            detailHTML += `
-                <div class="mb-10 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm break-inside-avoid w-full text-left">
-                    <div class="flex justify-between items-start mb-4 gap-4">
-                        <div>
-                            <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${q.cat || 'Bezpečnost'}</span>
-                            <h3 class="text-lg font-bold text-slate-900">${q.id}. ${q.q}</h3>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${colorClass}">
-                            Odpověď: ${textAns}
-                        </span>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-indigo-400">
-                            <p class="text-slate-600 text-sm italic mb-2">${q.eval || ''}</p>
-                            <p class="text-slate-900 text-sm font-medium"><strong>Shrnutí:</strong> ${q.rec || ''}</p>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                                <p class="text-[10px] font-bold text-emerald-700 uppercase mb-1">✅ Zásadní pravidlo</p>
-                                <p class="text-sm text-emerald-900">${q.rule || 'Není definováno'}</p>
-                            </div>
-                            <div class="p-4 bg-red-50 rounded-xl border border-red-100">
-                                <p class="text-[10px] font-bold text-red-700 uppercase mb-1">❌ Co nedělat</p>
-                                <div class="text-sm text-red-900">${formatBySemicolon(q.dont || '')}</div>
-                            </div>
-                        </div>
-
-                        ${weight < 1 ? `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                                <p class="text-[10px] font-bold text-indigo-700 uppercase mb-1">💡 Doporučení zdarma</p>
-                                <div class="text-sm text-indigo-900">${formatBySemicolon(q.recFree || 'Standardní postup')}</div>
-                            </div>
-                            <div class="p-4 bg-slate-900 rounded-xl text-white">
-                                <p class="text-[10px] font-bold text-indigo-300 uppercase mb-1">💰 Placené řešení (Profi)</p>
-                                <div class="text-sm text-slate-200">${formatBySemicolon(q.recPaid || 'Konzultujte s odborníkem')}</div>
-                            </div>
-                        </div>
-                        ` : ''}
-
-                        ${checklistHTML}
-                    </div>
-                </div>`;
+            // Uložíme si data o otázce pro pozdější vykreslení
+            resultsArray.push({
+                q: q,
+                weight: weight,
+                textAns: textAns
+            });
         }
-    });
+    }
 
     if (!allAnswered) { 
         alert("Prosím odpovězte na všechny otázky před vyhodnocením."); 
         return; 
     }
+
+    // 2. SEŘAZENÍ: Nejdříve špatné odpovědi (váha 0, pak 0.1, pak 0.5, nakonec 1)
+    resultsArray.sort((a, b) => a.weight - b.weight);
+
+    // 3. Generování HTML ze seřazeného pole
+    let detailHTML = ""; 
+	let separatorInserted = false;
+    resultsArray.forEach(item => {
+        const q = item.q;
+        const weight = item.weight;
+        const textAns = item.textAns;
+
+// VLOŽENÍ ODDĚLOVAČE: Pokud narazíme na první správnou odpověď (weight === 1)
+        if (weight === 1 && !separatorInserted) {
+            detailHTML += `
+                <div class="my-12 p-8 bg-emerald-50 border-2 border-emerald-200 rounded-3xl text-center shadow-sm">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-emerald-900 mb-2">Ostatní odpovědi byly vyhodnoceny jako bezpečné</h3>
+                    <p class="text-emerald-700 max-w-2xl mx-auto text-sm">
+                        Kdybyste v budoucnu potřebovali instrukce, jak s danými oblastmi pracovat, níže jsou uvedené odpovědi 
+                        na správně zodpovězené otázky s dalšími instrukcemi, stejně jako pro špatné odpovědi.
+                    </p>
+                </div>
+            `;
+            separatorInserted = true; // Zajistí, že se box vloží jen jednou
+        }
+        // Logika barev podle váhy
+        let colorClass = "bg-red-100 text-red-700";
+        if (weight === 1) colorClass = "bg-green-100 text-green-700";
+        else if (weight === 0.5) colorClass = "bg-amber-100 text-amber-700";
+
+        // Příprava checklistu (pokud existuje a váha je menší než 1)
+        let checklistHTML = "";
+        if (q.checklist) { 
+        const items = q.checklist.split(';');
+            checklistHTML = `
+                <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-6">
+                    <h4 class="font-bold text-amber-900 uppercase text-xs tracking-widest mb-4">✅ Akční checklist pro vás</h4>
+                    <div class="space-y-3">
+                        ${items.map(i => `
+                            <div class="flex items-center gap-3 text-sm text-amber-900">
+                                <span class="flex-grow">${i.trim()}</span>
+                                <input type="checkbox" class="w-5 h-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500 cursor-pointer">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+        }
+
+        // --- HLAVNÍ BLOK OTÁZKY ---
+        detailHTML += `
+            <div class="mb-10 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm break-inside-avoid w-full text-left">
+                <div class="flex justify-between items-start mb-4 gap-4">
+                    <div>
+                        <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${q.cat || 'Bezpečnost'}</span>
+                        <h3 class="text-lg font-bold text-slate-900">${q.id}. ${q.q}</h3>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${colorClass}">
+                        Odpověď: ${textAns}
+                    </span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-indigo-400">
+                        <p class="text-slate-600 text-sm italic mb-2">${q.eval || ''}</p>
+                        <p class="text-slate-900 text-sm font-medium"><strong>Shrnutí:</strong> ${q.rec || ''}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                            <p class="text-[10px] font-bold text-emerald-700 uppercase mb-1">✅ Zásadní pravidlo</p>
+                            <p class="text-sm text-emerald-900">${q.rule || 'Není definováno'}</p>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-xl border border-red-100">
+                            <p class="text-[10px] font-bold text-red-700 uppercase mb-1">❌ Co nedělat</p>
+                            <div class="text-sm text-red-900">${formatBySemicolon(q.dont || '')}</div>
+                        </div>
+                    </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                    <p class="text-[10px] font-bold text-indigo-700 uppercase mb-1">💡 Doporučení zdarma</p>
+                    <div class="text-sm text-indigo-900">${formatBySemicolon(q.recFree || 'Standardní postup')}</div>
+                </div>
+                <div class="p-4 bg-slate-900 rounded-xl text-white">
+                    <p class="text-[10px] font-bold text-indigo-300 uppercase mb-1">💰 Placené řešení (Profi)</p>
+                    <div class="text-sm text-slate-200">${formatBySemicolon(q.recPaid || 'Konzultujte s odborníkem')}</div>
+                </div>
+            </div>
+
+            ${checklistHTML}
+        </div>
+    </div>`;
+    });
 
     const percent = Math.round((totalWeightedScore / maxPossibleScore) * 100);
     const resDiv = document.getElementById('small-result');
