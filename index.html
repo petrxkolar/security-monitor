@@ -957,7 +957,7 @@ function renderDemoRiskContent(q) {
     };
 
     const colorClass = "bg-red-100 text-red-700";
-    const textAns = "NE / ČÁSTEČNĚ";
+    const textAns = "NE / ČÁSTEČNĚ / NEVÍM";
 
     return `
         <div class="mb-6 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm w-full text-left">
@@ -1209,13 +1209,14 @@ function evaluateSmall() {
 
     // 3. Generování HTML ze seřazeného pole
     let detailHTML = ""; 
-	let separatorInserted = false;
+    let separatorInserted = false;
+
     resultsArray.forEach(item => {
         const q = item.q;
         const weight = item.weight;
         const textAns = item.textAns;
 
-// VLOŽENÍ ODDĚLOVAČE: Pokud narazíme na první správnou odpověď (weight === 1)
+        // VLOŽENÍ ODDĚLOVAČE: Pokud narazíme na první správnou odpověď (weight === 1)
         if (weight === 1 && !separatorInserted) {
             detailHTML += `
                 <div class="my-12 p-8 bg-emerald-50 border-2 border-emerald-200 rounded-3xl text-center shadow-sm">
@@ -1231,17 +1232,36 @@ function evaluateSmall() {
                     </p>
                 </div>
             `;
-            separatorInserted = true; // Zajistí, že se box vloží jen jednou
+            separatorInserted = true; 
         }
-        // Logika barev podle váhy
-        let colorClass = "bg-red-100 text-red-700";
-        if (weight === 1) colorClass = "bg-green-100 text-green-700";
-        else if (weight === 0.5) colorClass = "bg-amber-100 text-amber-700";
 
-        // Příprava checklistu (pokud existuje a váha je menší než 1)
+        // --- DYNAMICKÉ FORMÁTOVÁNÍ PANELU ODPOVĚDI ---
+        let alertBoxHTML = "";
+        if (weight === 1) {
+            alertBoxHTML = `
+                <div class="w-full p-3 bg-green-100 border border-green-200 rounded-xl mb-4">
+                    <p class="text-green-800 text-sm font-bold">
+                        ✅ Vaše odpověď: <span class="uppercase">"${textAns}"</span> byla vyhodnocena jako bezpečná.
+                    </p>
+                </div>`;
+        } else {
+            const severity = weight < 0.5 ? "riziková" : "částečně riziková";
+            const bgColor = weight < 0.5 ? "bg-red-100 border-red-200" : "bg-amber-100 border-amber-200";
+            const textColor = weight < 0.5 ? "text-red-800" : "text-amber-800";
+            
+            alertBoxHTML = `
+                <div class="w-full p-4 ${bgColor} border rounded-xl mb-4 shadow-sm">
+                    <p class="${textColor} text-sm font-bold leading-relaxed">
+                        ⚠️ Vaše odpověď: <span class="uppercase">"${textAns}"</span> byla vyhodnocena jako ${severity}. 
+                        Zvažte prosím níže uvedená opatření a doporučení.
+                    </p>
+                </div>`;
+        }
+
+        // Příprava checklistu
         let checklistHTML = "";
         if (q.checklist) { 
-        const items = q.checklist.split(';');
+            const items = q.checklist.split(';');
             checklistHTML = `
                 <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-6">
                     <h4 class="font-bold text-amber-900 uppercase text-xs tracking-widest mb-4">✅ Akční checklist pro vás</h4>
@@ -1259,15 +1279,12 @@ function evaluateSmall() {
         // --- HLAVNÍ BLOK OTÁZKY ---
         detailHTML += `
             <div class="mb-10 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm break-inside-avoid w-full text-left">
-                <div class="flex justify-between items-start mb-4 gap-4">
-                    <div>
-                        <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${q.cat || 'Bezpečnost'}</span>
-                        <h3 class="text-lg font-bold text-slate-900">${q.id}. ${q.q}</h3>
-                    </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${colorClass}">
-                        Odpověď: ${textAns}
-                    </span>
+                <div class="mb-4">
+                    <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${q.cat || 'Bezpečnost'}</span>
+                    <h3 class="text-lg font-bold text-slate-900">${q.id}. ${q.q}</h3>
                 </div>
+
+                ${alertBoxHTML}
 
                 <div class="space-y-4">
                     <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-indigo-400">
@@ -1286,26 +1303,26 @@ function evaluateSmall() {
                         </div>
                     </div>
 
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                    <p class="text-[10px] font-bold text-indigo-700 uppercase mb-1">💡 Doporučení zdarma</p>
-                    <div class="text-sm text-indigo-900">${formatBySemicolon(q.recFree || 'Standardní postup')}</div>
-                </div>
-                <div class="p-4 bg-slate-900 rounded-xl text-white">
-                    <p class="text-[10px] font-bold text-indigo-300 uppercase mb-1">💰 Placené řešení (Profi)</p>
-                    <div class="text-sm text-slate-200">${formatBySemicolon(q.recPaid || 'Konzultujte s odborníkem')}</div>
-                </div>
-            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                            <p class="text-[10px] font-bold text-indigo-700 uppercase mb-1">💡 Doporučení zdarma</p>
+                            <div class="text-sm text-indigo-900">${formatBySemicolon(q.recFree || 'Standardní postup')}</div>
+                        </div>
+                        <div class="p-4 bg-slate-900 rounded-xl text-white">
+                            <p class="text-[10px] font-bold text-indigo-300 uppercase mb-1">💰 Placené řešení (Profi)</p>
+                            <div class="text-sm text-slate-200">${formatBySemicolon(q.recPaid || 'Konzultujte s odborníkem')}</div>
+                        </div>
+                    </div>
 
-            ${checklistHTML}
-        </div>
-    </div>`;
+                    ${checklistHTML}
+                </div>
+            </div>`;
     });
 
     const percent = Math.round((totalWeightedScore / maxPossibleScore) * 100);
     const resDiv = document.getElementById('small-result');
     
-// Vložení obsahu do výsledkového divu
+    // Vložení obsahu do výsledkového divu
     resDiv.innerHTML = `
         <div id="pdf-source-data" class="space-y-8 p-4 w-full">
             <div class="text-center border-b-2 border-indigo-600 pb-6">
@@ -1321,14 +1338,14 @@ function evaluateSmall() {
                 <div class="flex flex-col gap-2 w-full">${detailHTML}</div>
             </div>
         </div>
-			<div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-xl">
-    <div class="flex gap-3">
-        <span class="text-blue-600">ℹ️</span>
-        <p class="text-sm text-blue-800">
-            <strong>Instrukce pro export:</strong> Pro stažení reportu v <strong>.PDF formátu</strong> prosím klikněte na tlačítko níže a následně zvolte v tiskovém nastavení namísto Vaší tiskárny možnost <strong>"Uložit jako PDF"</strong>. Toto technologické omezení bude v následujících verzích odstraněno.
-        </p>
-    </div>
-</div>
+        <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-xl">
+            <div class="flex gap-3">
+                <span class="text-blue-600">ℹ️</span>
+                <p class="text-sm text-blue-800">
+                    <strong>Instrukce pro export:</strong> Pro stažení reportu v <strong>.PDF formátu</strong> prosím klikněte na tlačítko níže a následně zvolte v tiskovém nastavení namísto Vaší tiskárny možnost <strong>"Uložit jako PDF"</strong>.
+                </p>
+            </div>
+        </div>
         <button onclick="exportToPDF()" class="no-print w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition shadow-lg mt-6 flex items-center justify-center gap-2">
             <span>📥</span> STÁHNOUT KOMPLETNÍ REPORT (PDF)
         </button>
